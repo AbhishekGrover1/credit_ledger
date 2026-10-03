@@ -1,3 +1,5 @@
+<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" alt="Bottom Line" width="100%" />
+
 # *Credit Ledger*
 
 *This project provides an end-to-end machine learning solution for credit risk scoring. It integrates a Platt-calibrated XGBoost classifier with an F1-optimized decision threshold, deploying the entire prediction pipeline through a fully schema-validated FastAPI application*
@@ -230,4 +232,5 @@ Built by **[Abhishek Grover](https://abhishekgroverai.netlify.app)**. Open to AI
 
 Released under the [MIT License](LICENSE). © 2026 Abhishek Singh Grover.
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=100&color=0:1f2a44,100:0d1117&section=footer" alt="" width="100%" />
+<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" alt="Bottom Line" width="100%" />
+
