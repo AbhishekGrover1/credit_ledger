@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#06080c" />
+<meta name="description" content="Loan default risk scoring with a calibrated XGBoost model." />
+<meta name="author" content="Abhishek Grover" />
+<title>Credit Ledger</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230c1016'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23e0b45c' stroke-width='2'/%3E%3Cpath d='M16 10v12M10 16h12' stroke='%23e0b45c' stroke-width='2'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="ambient" aria-hidden="true"></div>
+
+<main class="page">
+
+  <header class="top">
+    <div class="brand">
+      <svg class="brand__mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="17" />
+        <circle cx="20" cy="20" r="11" />
+        <path d="M20 9v22M9 20h22" />
+      </svg>
+      <h1>Credit Ledger</h1>
+    </div>
+    <div class="status" id="status" role="status">
+      <span class="status__dot" id="statusDot"></span>
+      <span id="statusText">Connecting</span>
+    </div>
+  </header>
+
+  <form class="surface form" id="riskForm" novalidate>
+
+    <fieldset>
+      <legend>Applicant</legend>
+      <div class="grid">
+        <div class="field">
+          <label for="person_age">Age</label>
+          <div class="input"><input type="number" id="person_age" min="18" max="100" step="1" value="30" inputmode="numeric" required /><span class="input__unit">yrs</span></div>
+        </div>
+        <div class="field">
+          <label for="person_income">Annual income</label>
+          <div class="input"><span class="input__unit input__unit--lead">₹</span><input type="number" id="person_income" min="1" step="1000" value="600000" inputmode="numeric" required /></div>
+        </div>
+        <div class="field">
+          <label for="person_home_ownership">Home</label>
+          <div class="input input--select">
+            <select id="person_home_ownership" required>
+              <option value="RENT">Rent</option>
+              <option value="MORTGAGE">Mortgage</option>
+              <option value="OWN">Own</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="person_emp_length">Employment</label>
+          <div class="input"><input type="number" id="person_emp_length" min="0" max="60" step="0.5" value="5" inputmode="decimal" required /><span class="input__unit">yrs</span></div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Loan</legend>
+      <div class="grid">
+        <div class="field">
+          <label for="loan_intent">Purpose</label>
+          <div class="input input--select">
+            <select id="loan_intent" required>
+              <option value="PERSONAL">Personal</option>
+              <option value="EDUCATION">Education</option>
+              <option value="MEDICAL">Medical</option>
+              <option value="VENTURE">Venture</option>
+              <option value="HOMEIMPROVEMENT">Home improvement</option>
+              <option value="DEBTCONSOLIDATION">Debt consolidation</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="loan_amnt">Amount</label>
+          <div class="input"><span class="input__unit input__unit--lead">₹</span><input type="number" id="loan_amnt" min="1" step="500" value="100000" inputmode="numeric" required /></div>
+        </div>
+        <div class="field">
+          <label for="loan_int_rate">Interest rate</label>
+          <div class="input"><input type="number" id="loan_int_rate" min="0" max="40" step="0.01" value="11.5" inputmode="decimal" required /><span class="input__unit">%</span></div>
+        </div>
+        <div class="field">
+          <label for="loan_percent_income">Share of income</label>
+          <div class="input input--static"><output id="loan_percent_income" for="person_income loan_amnt">17%</output></div>
+        </div>
+        <div class="field field--wide">
+          <span class="label" id="gradeLabel">Grade</span>
+          <div class="keys keys--grade" role="radiogroup" aria-labelledby="gradeLabel" id="gradeKeys"></div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Credit file</legend>
+      <div class="grid">
+        <div class="field">
+          <span class="label" id="defaultLabel">Prior default</span>
+          <div class="keys keys--pair" role="radiogroup" aria-labelledby="defaultLabel" id="defaultKeys"></div>
+        </div>
+        <div class="field">
+          <label for="cb_person_cred_hist_length">History length</label>
+          <div class="input"><input type="number" id="cb_person_cred_hist_length" min="0" max="60" step="1" value="6" inputmode="numeric" required /><span class="input__unit">yrs</span></div>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="submit" class="key key--primary" id="submitBtn">
+        <span class="key__label" id="submitLabel">Assess risk</span>
+        <span class="key__spinner" aria-hidden="true"></span>
+      </button>
+      <p class="error" id="error" role="alert" hidden></p>
+    </div>
+  </form>
+
+  <section class="surface verdict" id="verdict" aria-live="polite" hidden>
+    <div class="gauge">
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+        </defs>
+        <circle class="gauge__track" cx="100" cy="100" r="86" />
+        <circle class="gauge__fill" id="gaugeFill" cx="100" cy="100" r="86" filter="url(#glow)" />
+        <line class="gauge__mark" id="gaugeMark" x1="100" y1="10" x2="100" y2="28" />
+      </svg>
+      <div class="gauge__read">
+        <span class="gauge__num"><span id="probNumber">0.0</span><small>%</small></span>
+        <span class="gauge__cap">default probability</span>
+      </div>
+    </div>
+
+    <div class="verdict__body">
+      <p class="verdict__result" id="verdictResult">Low risk</p>
+      <dl class="facts">
+        <div><dt>Probability</dt><dd id="factProb">—</dd></div>
+        <div><dt>Threshold</dt><dd id="factThreshold">—</dd></div>
+        <div><dt>Decision</dt><dd id="factDecision">—</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <ul class="stack" aria-label="Built with">
+      <li>FastAPI</li>
+      <li>XGBoost</li>
+      <li>scikit-learn</li>
+      <li>Pydantic</li>
+      <li>SHAP</li>
+      <li>Render</li>
+    </ul>
+    <p class="credit">
+      © 2026 Abhishek Grover
+      <span class="credit__links">
+        <a href="https://github.com/AbhishekGrover1" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://www.linkedin.com/in/abhishek-grover-07" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      </span>
+    </p>
+  </footer>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

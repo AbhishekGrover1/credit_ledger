@@ -1,0 +1,723 @@
+/* ─────────────────────────────────────────────────────────────────
+   Credit Ledger  ·  style.css
+   Author: Abhishek Grover  ·  github.com/AbhishekGrover1
+───────────────────────────────────────────────────────────────── */
+
+:root {
+  /* background layers */
+  --bg:       #05070b;
+  --surface:  #0a0e14;
+  --raised:   #101620;
+
+  /* borders */
+  --line:        rgba(255, 255, 255, 0.065);
+  --line-strong: rgba(255, 255, 255, 0.12);
+
+  /* ink */
+  --ink:   #ecf0f3;
+  --ink-2: #96a1ae;
+  --ink-3: #58636f;
+
+  /* accent – gold */
+  --gold:    #dfb35a;
+  --gold-hi: #f0ce84;
+  --gold-lo: #8c6923;
+  --gold-r: 223; --gold-g: 179; --gold-b: 90;
+
+  /* state colours */
+  --green: #4fcb91;
+  --green-r: 79;  --green-g: 203; --green-b: 145;
+  --red:   #f06060;
+  --red-r: 240;   --red-g: 96;   --red-b: 96;
+
+  /* type */
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:    "Figtree", "Segoe UI", system-ui, sans-serif;
+
+  /* shape */
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+}
+
+/* ── reset ───────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { color-scheme: dark; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── ambient backdrop ────────────────────────────────────────── */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(70% 50% at 50% -8%,
+      rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.13) 0%, transparent 70%),
+    radial-gradient(45% 35% at 92% 98%,
+      rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.055) 0%, transparent 70%);
+}
+
+/* ── page shell ─────────────────────────────────────────────── */
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 44px 22px 64px;
+}
+
+/* ── header ─────────────────────────────────────────────────── */
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.brand__mark {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 10px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.55));
+}
+
+.brand h1 {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 25px;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+}
+
+/* status pill */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.018);
+  font-size: 12px;
+  color: var(--ink-2);
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.status__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-3);
+  flex-shrink: 0;
+  transition: background 0.35s, box-shadow 0.35s;
+}
+.status__dot.ok   { background: var(--green); box-shadow: 0 0 8px 2px rgba(var(--green-r), var(--green-g), var(--green-b), 0.75); }
+.status__dot.down { background: var(--red);   box-shadow: 0 0 8px 2px rgba(var(--red-r), var(--red-g), var(--red-b), 0.75); }
+
+/* ── glowing surface card ────────────────────────────────────── */
+/*
+   Architecture: isolation:isolate creates a new stacking context.
+   ::before = spotlight border ring (mask trick).
+   ::after  = face glow layer.
+   Both sit INSIDE the stacking context so they show above the bg
+   but below content (z-index 0 vs content auto).
+*/
+.surface {
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.022) 0%, transparent 28%),
+    var(--surface);
+  border-radius: var(--r-lg);
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 24px 56px -24px rgba(0, 0, 0, 0.75);
+  will-change: transform;
+}
+
+/* spotlight border */
+.surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    280px circle at var(--mx) var(--my),
+    rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.9),
+    transparent 60%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* face glow */
+.surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    460px circle at var(--mx) var(--my),
+    rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.07),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.surface:hover::before,
+.surface:hover::after,
+.surface:focus-within::before,
+.surface:focus-within::after { opacity: 1; }
+
+/* ensure form children sit above the pseudo layers */
+.surface > * { position: relative; z-index: 1; }
+
+/* ── form layout ─────────────────────────────────────────────── */
+.form { padding: 6px 30px 34px; }
+
+fieldset {
+  margin: 0;
+  padding: 26px 0 28px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+fieldset:last-of-type { border-bottom: 0; }
+
+legend {
+  padding: 0;
+  margin-bottom: 18px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+.field--wide { grid-column: 1 / -1; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+label, .label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0.005em;
+}
+
+/* text / number inputs */
+.input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 46px;
+  background: var(--raised);
+  border-radius: var(--r-sm);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.4),
+    0 0 0 1px var(--line);
+  transition: box-shadow 0.18s;
+}
+.input:hover { box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--line-strong); }
+.input:focus-within {
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.85),
+    0 0 20px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.2);
+}
+
+.input input,
+.input select {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 14px;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.input input::-webkit-outer-spin-button,
+.input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.input input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+.input__unit {
+  padding-right: 13px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.input__unit--lead { padding: 0 0 0 13px; }
+.input__unit--lead + input { padding-left: 5px; }
+
+/* select wrapper */
+.input--select select { appearance: none; cursor: pointer; padding-right: 34px; }
+.input--select select option { background: var(--raised); color: var(--ink); }
+.input--select::after {
+  content: "";
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -5px;
+  border-right: 1.5px solid var(--ink-2);
+  border-bottom: 1.5px solid var(--ink-2);
+  transform: rotate(45deg);
+  pointer-events: none;
+  transition: border-color 0.18s;
+}
+.input--select:focus-within::after { border-color: var(--gold); }
+
+/* computed output field */
+.input--static {
+  background: rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.04);
+  box-shadow: 0 0 0 1px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.15);
+}
+.input--static output {
+  padding: 0 14px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold-hi);
+  font-weight: 600;
+}
+
+/* ── 3-D key buttons ─────────────────────────────────────────── */
+/*
+   Each key has a CSS-custom-property driven tilt (--rx, --ry) and
+   a highlight position (--kx, --ky) updated by pointermove in JS.
+   --depth controls the extrusion shadow offset.
+*/
+.key {
+  --rx: 0deg;
+  --ry: 0deg;
+  --kx: 50%;
+  --ky: 50%;
+  --depth: 5px;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+
+  color: var(--ink-2);
+  border-radius: var(--r-sm);
+
+  background:
+    radial-gradient(100px circle at var(--kx) var(--ky),
+      rgba(255, 255, 255, 0.1), transparent 68%),
+    linear-gradient(175deg, #1c2535 0%, #131c28 100%);
+
+  box-shadow:
+    0 var(--depth) 0 0 #060810,
+    0 calc(var(--depth) + 9px) 20px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+
+  transform:
+    perspective(560px)
+    rotateX(var(--rx))
+    rotateY(var(--ry));
+
+  transition:
+    transform 0.16s ease-out,
+    box-shadow 0.16s ease-out,
+    color 0.15s;
+  will-change: transform;
+}
+
+.key:hover { color: var(--ink); }
+
+.key:active {
+  transform:
+    perspective(560px)
+    rotateX(var(--rx))
+    rotateY(var(--ry))
+    translateY(calc(var(--depth) - 1px));
+  box-shadow:
+    0 1px 0 #060810,
+    0 4px 8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.key:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ── segmented radio keys (grade + prior default) ────────────── */
+.keys { display: grid; gap: 8px; }
+.keys--grade { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.keys--pair  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.keys .key {
+  --depth: 4px;
+  height: 44px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 14.5px;
+  /* bottom margin absorbs the extrusion so grid rows stay aligned */
+  margin-bottom: calc(var(--depth));
+}
+
+/* selected state */
+.keys .key[aria-checked="true"] {
+  color: #1a1305;
+  background:
+    radial-gradient(100px circle at var(--kx) var(--ky),
+      rgba(255, 255, 255, 0.38), transparent 68%),
+    linear-gradient(175deg, var(--gold-hi) 0%, var(--gold) 100%);
+  box-shadow:
+    0 var(--depth) 0 var(--gold-lo),
+    0 calc(var(--depth) + 8px) 24px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 1px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.25),
+    0 0 22px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.28);
+}
+.keys .key[aria-checked="true"]:active {
+  box-shadow:
+    0 1px 0 var(--gold-lo),
+    0 3px 10px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 0 0 1px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.22),
+    0 0 18px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.25);
+}
+
+/* ── primary submit button ───────────────────────────────────── */
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding-top: 30px;
+}
+
+.key--primary {
+  --depth: 7px;
+  min-width: 240px;
+  height: 58px;
+  padding: 0 40px;
+  margin-bottom: var(--depth);
+  border-radius: var(--r-md);
+
+  color: #160f02;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+
+  background:
+    radial-gradient(160px circle at var(--kx) var(--ky),
+      rgba(255, 255, 255, 0.52), transparent 68%),
+    linear-gradient(175deg, var(--gold-hi) 0%, var(--gold) 100%);
+
+  box-shadow:
+    0 var(--depth) 0 var(--gold-lo),
+    0 calc(var(--depth) + 12px) 32px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    0 0 0 1px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.22),
+    0 0 44px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.2);
+}
+.key--primary:hover { color: #160f02; }
+.key--primary:active {
+  box-shadow:
+    0 1px 0 var(--gold-lo),
+    0 5px 14px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 1px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.18),
+    0 0 30px rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.2);
+}
+.key--primary:disabled {
+  cursor: progress;
+  filter: saturate(0.75) brightness(0.9);
+}
+.key--primary:focus-visible { outline-color: var(--gold-hi); }
+
+/* spinner – must use visibility not display to allow animation */
+.key__spinner {
+  visibility: hidden;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(22, 15, 2, 0.28);
+  border-top-color: #160f02;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.key--primary.is-loading .key__spinner { visibility: visible; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error {
+  margin: 0;
+  padding: 10px 16px;
+  max-width: 46ch;
+  text-align: center;
+  font-size: 13px;
+  color: var(--red);
+  border: 1px solid rgba(var(--red-r), var(--red-g), var(--red-b), 0.2);
+  border-radius: var(--r-xs);
+  background: rgba(var(--red-r), var(--red-g), var(--red-b), 0.06);
+}
+
+/* ── verdict panel ───────────────────────────────────────────── */
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin-top: 20px;
+  padding: 36px 36px 32px;
+}
+
+/* gauge */
+.gauge {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  flex-shrink: 0;
+}
+.gauge svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gauge__track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.065);
+  stroke-width: 10;
+}
+.gauge__fill {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-dasharray: 540.35;
+  stroke-dashoffset: 540.35;
+  transform-origin: 100px 100px;
+  transform: rotate(-90deg);
+  transition: stroke-dashoffset 1.05s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.35s;
+}
+.gauge__fill.is-low  { stroke: var(--green); }
+.gauge__fill.is-high { stroke: var(--red); }
+
+.gauge__mark {
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 2;
+  stroke-linecap: round;
+  transform-origin: 100px 100px;
+  /* transition for mark rotation */
+  transition: transform 0.5s ease-out;
+}
+
+.gauge__read {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gauge__num {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 40px;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.gauge__num small {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink-2);
+  margin-left: 1px;
+}
+.gauge__cap {
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 5px;
+  letter-spacing: 0.01em;
+}
+
+/* verdict body */
+.verdict__body { flex: 1; min-width: 0; }
+
+.verdict__result {
+  margin: 0 0 20px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  transition: color 0.3s, text-shadow 0.3s;
+}
+.verdict__result.is-low {
+  color: var(--green);
+  text-shadow: 0 0 32px rgba(var(--green-r), var(--green-g), var(--green-b), 0.42);
+}
+.verdict__result.is-high {
+  color: var(--red);
+  text-shadow: 0 0 32px rgba(var(--red-r), var(--red-g), var(--red-b), 0.42);
+}
+
+.facts { margin: 0; }
+.facts > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+}
+.facts > div:last-child { border-bottom: 1px solid var(--line); }
+.facts dt { color: var(--ink-2); font-size: 13px; }
+.facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+/* ── footer ──────────────────────────────────────────────────── */
+.foot {
+  margin-top: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.stack {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stack li {
+  padding: 3px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.018);
+  font-size: 11.5px;
+  color: var(--ink-3);
+  letter-spacing: 0.01em;
+}
+
+.credit {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-3);
+  text-align: center;
+}
+.credit__links {
+  margin-left: 10px;
+  display: inline-flex;
+  gap: 14px;
+}
+.credit a {
+  color: var(--ink-2);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-strong);
+  transition: color 0.18s, border-color 0.18s;
+}
+.credit a:hover { color: var(--gold-hi); border-color: rgba(var(--gold-r), var(--gold-g), var(--gold-b), 0.7); }
+.credit a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; border-radius: 3px; }
+
+/* ── responsive ──────────────────────────────────────────────── */
+@media (max-width: 580px) {
+  .page { padding: 28px 14px 44px; }
+  .form { padding: 4px 18px 28px; }
+  .grid { grid-template-columns: 1fr; }
+  .keys--grade { gap: 5px; }
+  .keys--grade .key { font-size: 13px; padding: 0; }
+  .key--primary { width: 100%; min-width: unset; }
+  .verdict { flex-direction: column; text-align: center; padding: 28px 22px 24px; gap: 24px; }
+  .verdict__body { width: 100%; }
+  .status span:last-child { display: none; }
+  .status { padding: 8px; }
+}
+
+/* touch devices – kill the tilt, keep the press */
+@media (hover: none) {
+  .key { transform: none !important; }
+  .key:active {
+    transform: translateY(calc(var(--depth) - 1px)) !important;
+    transition-duration: 0.08s !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  .key { transform: none !important; }
+  .gauge__mark { transition: none; }
+}
