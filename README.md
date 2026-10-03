@@ -1,13 +1,7 @@
-<div align="center">
+# ***Credit Ledger***
+***Loan default risk scoring powered by a calibrated XGBoost pipeline***
 
-```
- ┌──────────────────────────────────────────┐
- │           C R E D I T   L E D G E R     │
- └──────────────────────────────────────────┘
-```
-
-**Loan default risk scoring powered by a calibrated XGBoost pipeline.**
-
+[![Live Link](https://img.shields.io/badge/Live-Link-red?style=flat-square)](https://credit-ledger-otav.onrender.com/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![XGBoost](https://img.shields.io/badge/XGBoost-3.4-ef6c00?style=flat-square)](https://xgboost.readthedocs.io)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.6-f7931e?style=flat-square&logo=scikit-learn&logoColor=white)](https://scikit-learn.org)
