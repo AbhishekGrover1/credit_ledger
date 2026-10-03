@@ -1,4 +1,3 @@
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" alt="Bottom Line" width="100%" />
 
 # *Credit Ledger*
 
@@ -13,9 +12,6 @@
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.6-green?style=flat-square&labelColor=1f2937&logo=scikit-learn&logoColor=green)](https://scikit-learn.org)
 <br/>
 
-| ROC-AUC | Precision | Recall | F1-Score | Decision Threshold |
-|:---:|:---:|:---:|:---:|:---:|
-| **0.953** | **0.967** | **0.742** | **0.840** | **0.695** |
 
 </div>
 
